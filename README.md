@@ -1,14 +1,6 @@
-# Node Typescript Starter
+# How to deploy contracts to the same address on any chain
 
-Starter kit to build with Node and thirdweb without additional initial configuration.
-
-## Installation
-
-Install the template with [thirdweb create](https://portal.thirdweb.com/cli/create)
-
-```bash
-  npx thirdweb create app --node --typescript --evm
-```
+This demo script shows how to deploy a published contract on multiple chains with the same address.
 
 ## Run Locally
 
