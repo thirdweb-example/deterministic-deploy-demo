@@ -1,8 +1,17 @@
 import { config } from "dotenv";
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
-import { readFileSync } from "fs";
+import { Goerli, Mumbai } from "@thirdweb-dev/chains";
 
 config();
+
+// chains to deploy to
+const chainsToDeployTo = [Goerli, Mumbai];
+// the name of the published contract to deploy ex: AccountFactory for the contract https://thirdweb.com/thirdweb.eth/AccountFactory
+const publishedContractToDeploy = "AccountFactory";
+// The full list of constructor arguments for the published contract (for AccountFactory we just need the Entrypoint address)
+const publishedContractConstructorArguments = [
+  "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+];
 
 const main = async () => {
   if (!process.env.WALLET_PRIVATE_KEY) {
@@ -10,43 +19,34 @@ const main = async () => {
   }
 
   try {
-    const sdk = ThirdwebSDK.fromPrivateKey(
-      process.env.WALLET_PRIVATE_KEY,
-      "mumbai",
-      {
-        secretKey: process.env.THIRDWEB_SECRET_KEY,
-      }
-    );
+    for (const chain of chainsToDeployTo) {
+      const sdk = ThirdwebSDK.fromPrivateKey(
+        process.env.WALLET_PRIVATE_KEY,
+        chain,
+        {
+          secretKey: process.env.THIRDWEB_SECRET_KEY,
+        }
+      );
+      // shows how to predict the address of any published contract
+      const predictedAddress = await sdk.deployer.predictAddressDeterministic(
+        publishedContractToDeploy,
+        publishedContractConstructorArguments
+      );
+      console.log("deploying on", chain.slug, "at address:", predictedAddress);
 
-    const contractAddress = await sdk.deployer.deployNFTDrop({
-      name: "My Drop",
-      primary_sale_recipient: "0x39Ab29fAfb5ad19e96CFB1E1c492083492DB89d4",
-    });
-
-    console.log("Contract address: ", contractAddress);
-
-    const contract = await sdk.getContract(contractAddress, "nft-drop");
-
-    const metadatas = [
-      {
-        name: "Blue Star",
-        description: "A blue star NFT",
-        image: readFileSync("assets/blue-star.png"),
-      },
-      {
-        name: "Red Star",
-        description: "A red star NFT",
-        image: readFileSync("assets/red-star.png"),
-      },
-      {
-        name: "Yellow Star",
-        description: "A yellow star NFT",
-        image: readFileSync("assets/yellow-star.png"),
-      },
-    ];
-
-    await contract.createBatch(metadatas);
-    console.log("Created batch successfully!");
+      // shows how to deploy a published contract at a deterministic address
+      const deployedAddress =
+        await sdk.deployer.deployPublishedContractDeterministic(
+          publishedContractToDeploy,
+          publishedContractConstructorArguments
+        );
+      console.log(
+        "--> succesfully deployed on",
+        chain.slug,
+        "at address:",
+        deployedAddress
+      );
+    }
   } catch (e) {
     console.error("Something went wrong: ", e);
   }
