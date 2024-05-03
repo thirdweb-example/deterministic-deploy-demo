@@ -1,6 +1,6 @@
-# How to deploy contracts to the same address on any chain
+# Deploy contracts with the same address on any chain
 
-This demo script shows how to deploy a published contract on multiple chains with the same address.
+This demo script shows how to deploy a [published](https://portal.thirdweb.com/contracts/publish/overview) contract on multiple chains with the same address.
 
 ## Run Locally
 
